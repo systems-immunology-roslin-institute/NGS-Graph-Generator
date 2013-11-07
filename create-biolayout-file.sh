@@ -124,17 +124,17 @@ then
     echo "grangesscript_gtf.R failed"
     exit $?
   fi
-
-  ${R_SCRIPT} findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
-    -p "${OUTPUT_DIRECTORY}/"
-  if [ "$?" != 0 ];
-  then
-    echo "findoverlaps.R failed"
-    exit $?
-  fi
 fi
 
 echo ${INPUT_HASH} > ${HASH_FILE}
+
+${R_SCRIPT} findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
+  -p "${OUTPUT_DIRECTORY}/"
+if [ "$?" != 0 ];
+then
+  echo "findoverlaps.R failed"
+  exit $?
+fi
 
 R2R_OUTPUT_DIR="${OUTPUT_DIRECTORY}/r2r_output"
 
