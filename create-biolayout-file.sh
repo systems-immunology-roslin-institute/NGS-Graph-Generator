@@ -1,6 +1,8 @@
 #! /bin/bash
 
-while getopts b:t:g:o:d:n: ARG
+SCRIPT_NAME=$(basename $0)
+
+while getopts b:t:g:o:d:n:h ARG
 do
   case ${ARG} in
     (b) UNSORTED_BAM_FILE=$(readlink -f "$OPTARG");;
@@ -9,6 +11,16 @@ do
     (o) OUTPUT_DIRECTORY=$(readlink -f "$OPTARG");;
     (d) GENE_LIST="$OPTARG";;
     (n) GENE_LIST=$(cat "$OPTARG");;
+    (h)
+      echo "${SCRIPT_NAME}"
+      echo "  One of -d or -n must be specified in addition to all the other options"
+      echo "  -b <file> The unsorted BAM file"
+      echo "  -t <file> The chromosome length file"
+      echo "  -g <file> The GTF file"
+      echo "  -o <directory> The directory in which to place the output"
+      echo "  -d \"GENE1, GENE2, ..., GENEN\" A list of genes to examine"
+      echo "  -n <file> A file containing a list of genes to examine"
+      exit 0;;
 
     (*)
       exit 1;;
