@@ -62,15 +62,15 @@ gtf <- gtf[gtf$V1 %in% names(chrLens),]
 
 cat("Running GRanges...\n")
 GR  <-   GRanges(
-         seqnames   = Rle(factor(gtf$V1,levels=names(chrLens))),
-         ranges     = IRanges(start=gtf$V4, end=gtf$V5),
-         strand     = Rle(factor(gtf$V7)),
-         seqlengths = chrLens,
-         geneid       = gtf$gene_id,
-	 transcriptid = gtf$transcript_id,
-	 exonnumber = gtf$exon_number,
-	 genename   = gtf$gene_name,
-	 biotype = gtf$biotype
+        seqnames     = Rle(factor(gtf$V1,levels=names(chrLens))),
+        ranges       = IRanges(start=gtf$V4, end=gtf$V5),
+        strand       = Rle(factor(gtf$V7)),
+        seqlengths   = chrLens,
+        geneid       = gtf$gene_id,
+        transcriptid = gtf$transcript_id,
+        exonnumber   = gtf$exon_number,
+        genename     = gtf$gene_name,
+        biotype      = gtf$biotype
       )
 
 cat(sprintf("Writing output file '%s'.\n", outFile))
