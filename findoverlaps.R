@@ -22,11 +22,14 @@ if(!is.null(opt$help) || is.null(opt$grangesFile) || is.null(opt$gtfAnnotationFi
 
 if(!is.null(opt$geneList))
 {
-  targetGenes <- scan(textConnection(gsub("\\s", "", opt$geneList)), what="character", sep=",")
+  targetGenes <- scan(textConnection(gsub("\\s*,\\s*|\\s+", " ", opt$geneList, perl=TRUE)), what="character", sep=" ")
+  targetGenes = targetGenes[targetGenes != ""]
 } else
 {
   targetGenes <- readLines(opt$fileGeneList)
 }
+
+cat(sprintf("Processing %d genes...\n", length(targetGenes)))
 
 # load GRanges of Ensembl human gtf annotations (based on hg19)
 if(!file.exists(opt$gtfAnnotationFile))
