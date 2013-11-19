@@ -2,7 +2,7 @@
 
 SCRIPT_NAME=$(basename $0)
 
-while getopts b:t:g:o:d:n:h ARG
+while getopts b:t:g:o:d:n:p:l:h ARG
 do
   case ${ARG} in
     (b) UNSORTED_BAM_FILE=$(readlink -f "$OPTARG");;
@@ -11,6 +11,8 @@ do
     (o) OUTPUT_DIRECTORY=$(readlink -f "$OPTARG");;
     (d) GENE_LIST="$OPTARG";;
     (n) GENE_LIST=$(cat "$OPTARG");;
+    (p) PERCENTAGE="$OPTARG";;
+    (l) COVERAGE="$OPTARG";;
     (h)
       echo "${SCRIPT_NAME}"
       echo "  One of -d or -n must be specified in addition to all the other options"
@@ -20,6 +22,8 @@ do
       echo "  -o <directory> The directory in which to place the output"
       echo "  -d \"GENE1, GENE2, ..., GENEN\" A list of genes to examine"
       echo "  -n <file> A file containing a list of genes to examine"
+      echo "  -p <value> The percentage similarity value (default 85)"
+      echo "  -l <value> The percentage coverage value (default 55)"
       exit 0;;
 
     (*)
@@ -56,7 +60,20 @@ then
   exit 1
 fi
 
+if [ ! "${PERCENTAGE}" ];
+then
+  PERCENTAGE="85"
+fi
+
+if [ ! "${COVERAGE}" ];
+then
+  COVERAGE="55"
+fi
+
 GENE_LIST=$(echo "$GENE_LIST" | perl -pe 's/\s*,\s*|\s+/ /g')
+
+NUM_CORES=$(nproc)
+echo "Using ${NUM_CORES} cores..."
 
 echo "Computing hash..."
 INPUT_HASH=$(cat ${UNSORTED_BAM_FILE} ${CHROMOSOME_LENGTH_FILE} ${GTF_FILE} | md5sum)
@@ -149,7 +166,8 @@ do
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
   rm -rf "${R2R_OUTPUT_DIR}"
-  ./read2read.py "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
+  ./read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} \
+    "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
   if [ "$?" != 0 ];
   then
     echo "read2read.py failed"
