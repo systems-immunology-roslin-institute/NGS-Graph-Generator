@@ -3,13 +3,14 @@
 SCRIPT_NAME=$(basename $0)
 DIR_NAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-while getopts b:t:g:o:d:n:p:l:h ARG
+while getopts b:t:g:o:c:d:n:p:l:h ARG
 do
   case ${ARG} in
     (b) UNSORTED_BAM_FILE=$(readlink -f "$OPTARG");;
     (t) CHROMOSOME_LENGTH_FILE=$(readlink -f "$OPTARG");;
     (g) GTF_FILE=$(readlink -f "$OPTARG");;
     (o) OUTPUT_DIRECTORY=$(readlink -f "$OPTARG");;
+    (c) CACHE_DIRECTORY=$(readlink -f "$OPTARG");;
     (d) GENE_LIST="$OPTARG";;
     (n) GENE_LIST=$(cat "$OPTARG");;
     (p) PERCENTAGE="$OPTARG";;
@@ -21,6 +22,7 @@ do
       echo "  -t <file> The chromosome length file"
       echo "  -g <file> The GTF file"
       echo "  -o <directory> The directory in which to place the output"
+      echo "  -c <directory> The directory in which to cache intermediate files"
       echo "  -d \"GENE1, GENE2, ..., GENEN\" A list of genes to examine"
       echo "  -n <file> A file containing a list of genes to examine"
       echo "  -p <value> The percentage similarity value (default 85)"
@@ -53,6 +55,11 @@ fi
 if [ ! "${OUTPUT_DIRECTORY}" ];
 then
   OUTPUT_DIRECTORY=$(readlink -f output)
+fi
+
+if [ ! "${CACHE_DIRECTORY}" ];
+then
+  CACHE_DIRECTORY=$(readlink -f cache)
 fi
 
 if [ ! "${GENE_LIST}" ];
@@ -99,24 +106,25 @@ then
 fi
 
 COMPUTE_DATA=0
-HASH_FILE="${OUTPUT_DIRECTORY}/hash"
-if [ ! -e "${HASH_FILE}" ];
+HASH_DIRECTORY="${CACHE_DIRECTORY}/${INPUT_HASH}"
+if [ ! -e "${HASH_DIRECTORY}" ];
 then
   COMPUTE_DATA=1
-else
-  EXISTING_HASH=$(cat ${HASH_FILE})
-  if [ "${EXISTING_HASH}" != "${INPUT_HASH}" ];
+  mkdir -p ${HASH_DIRECTORY}
+  EXITCODE="$?"
+  if [ "$EXITCODE" != 0 ];
   then
-    COMPUTE_DATA=1
+    echo "Cannot create ${HASH_DIRECTORY}"
+    exit $EXITCODE
   fi
 fi
 
 BASENAME_BAM_FILE=$(basename ${UNSORTED_BAM_FILE})
 NO_EXT_BAM_FILE="${BASENAME_BAM_FILE%.*}"
-SAMTOOLS_SORTED_BAM_FILE="${OUTPUT_DIRECTORY}/${NO_EXT_BAM_FILE}-sorted"
+SAMTOOLS_SORTED_BAM_FILE="${HASH_DIRECTORY}/${NO_EXT_BAM_FILE}-sorted"
 SORTED_BAM_FILE="${SAMTOOLS_SORTED_BAM_FILE}.bam"
-GRANGES_FILE="${OUTPUT_DIRECTORY}/${NO_EXT_BAM_FILE}-GRanges.RData"
-GTF_ANNOTATION_FILE="${OUTPUT_DIRECTORY}/${NO_EXT_BAM_FILE}-ensembl_gtfannotation.RData"
+GRANGES_FILE="${HASH_DIRECTORY}/${NO_EXT_BAM_FILE}-GRanges.RData"
+GTF_ANNOTATION_FILE="${HASH_DIRECTORY}/${NO_EXT_BAM_FILE}-ensembl_gtfannotation.RData"
 
 if [ "${COMPUTE_DATA}" == "1" ];
 then
@@ -147,8 +155,6 @@ then
     exit $EXITCODE
   fi
 fi
-
-echo ${INPUT_HASH} > ${HASH_FILE}
 
 ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
   -p "${OUTPUT_DIRECTORY}/"
