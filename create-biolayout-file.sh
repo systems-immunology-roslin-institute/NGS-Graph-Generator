@@ -1,6 +1,7 @@
 #! /bin/bash
 
 SCRIPT_NAME=$(basename $0)
+DIR_NAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 while getopts b:t:g:o:d:n:p:l:h ARG
 do
@@ -90,10 +91,11 @@ SAMTOOLS=samtools
 R_SCRIPT=Rscript
 
 mkdir -p ${OUTPUT_DIRECTORY}
-if [ "$?" != 0 ];
+EXITCODE="$?"
+if [ "$EXITCODE" != 0 ];
 then
   echo "Cannot create ${OUTPUT_DIRECTORY}"
-  exit $?
+  exit $EXITCODE
 fi
 
 COMPUTE_DATA=0
@@ -120,37 +122,41 @@ if [ "${COMPUTE_DATA}" == "1" ];
 then
   echo "Sorting ${UNSORTED_BAM_FILE}..."
   ${SAMTOOLS} sort ${UNSORTED_BAM_FILE} ${SAMTOOLS_SORTED_BAM_FILE}
-  if [ "$?" != 0 ];
+  EXITCODE="$?"
+  if [ "$EXITCODE" != 0 ];
   then
     echo "samtools sort step failed"
-    exit $?
+    exit $EXITCODE
   fi
 
-  ${R_SCRIPT} grangesscript.R -b "${SORTED_BAM_FILE}" -t "${CHROMOSOME_LENGTH_FILE}" \
+  ${R_SCRIPT} ${DIR_NAME}/grangesscript.R -b "${SORTED_BAM_FILE}" -t "${CHROMOSOME_LENGTH_FILE}" \
     -o "${GRANGES_FILE}"
-  if [ "$?" != 0 ];
+  EXITCODE="$?"
+  if [ "$EXITCODE" != 0 ];
   then
     echo "grangesscript.R failed"
-    exit $?
+    exit $EXITCODE
   fi
 
-  ${R_SCRIPT} grangesscript_gtf.R -g "${GTF_FILE}" -t "${CHROMOSOME_LENGTH_FILE}" \
+  ${R_SCRIPT} ${DIR_NAME}/grangesscript_gtf.R -g "${GTF_FILE}" -t "${CHROMOSOME_LENGTH_FILE}" \
     -o "${GTF_ANNOTATION_FILE}"
-  if [ "$?" != 0 ];
+  EXITCODE="$?"
+  if [ "$EXITCODE" != 0 ];
   then
     echo "grangesscript_gtf.R failed"
-    exit $?
+    exit $EXITCODE
   fi
 fi
 
 echo ${INPUT_HASH} > ${HASH_FILE}
 
-${R_SCRIPT} findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
+${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
   -p "${OUTPUT_DIRECTORY}/"
-if [ "$?" != 0 ];
+EXITCODE="$?"
+if [ "$EXITCODE" != 0 ];
 then
   echo "findoverlaps.R failed"
-  exit $?
+  exit $EXITCODE
 fi
 
 R2R_OUTPUT_DIR="${OUTPUT_DIRECTORY}/r2r_output"
@@ -158,20 +164,21 @@ R2R_OUTPUT_DIR="${OUTPUT_DIRECTORY}/r2r_output"
 for GENE in ${GENE_LIST}
 do
   echo "Writing ${GENE}.fasta"
-  ./tab-to-fasta.sh "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
+  ${DIR_NAME}/tab-to-fasta.sh "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta"
 
   echo "Writing ${GENE}.nodeclass"
-  ./tab-to-nodeclass.sh "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
+  ${DIR_NAME}/tab-to-nodeclass.sh "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
   rm -rf "${R2R_OUTPUT_DIR}"
-  ./read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} \
+  ${DIR_NAME}/read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
-  if [ "$?" != 0 ];
+  EXITCODE="$?"
+  if [ "$EXITCODE" != 0 ];
   then
     echo "read2read.py failed"
-    exit $?
+    exit $EXITCODE
   fi
   
   cat "${R2R_OUTPUT_DIR}/${GENE}_pairwise.txt" \
