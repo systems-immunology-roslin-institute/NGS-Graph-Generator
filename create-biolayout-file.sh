@@ -107,7 +107,8 @@ fi
 
 COMPUTE_DATA=0
 HASH_DIRECTORY="${CACHE_DIRECTORY}/${INPUT_HASH}"
-if [ ! -e "${HASH_DIRECTORY}" ];
+echo Checking if ${HASH_DIRECTORY} exists...
+if [ ! -d "${HASH_DIRECTORY}" ];
 then
   COMPUTE_DATA=1
   mkdir -p ${HASH_DIRECTORY}
@@ -117,6 +118,9 @@ then
     echo "Cannot create ${HASH_DIRECTORY}"
     exit $EXITCODE
   fi
+elif [ ! -e "${HASH_DIRECTORY}/valid" ]
+then
+  COMPUTE_DATA=1
 fi
 
 BASENAME_BAM_FILE=$(basename ${UNSORTED_BAM_FILE})
@@ -154,6 +158,10 @@ then
     echo "grangesscript_gtf.R failed"
     exit $EXITCODE
   fi
+
+  touch "${HASH_DIRECTORY}/valid"
+else
+  echo Using cached data...
 fi
 
 ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
