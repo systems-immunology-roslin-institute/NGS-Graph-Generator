@@ -78,7 +78,7 @@ then
   COVERAGE="55"
 fi
 
-GENE_LIST=$(echo "$GENE_LIST" | perl -pe 's/\s*,\s*|\s+/ /g')
+GENE_LIST=$(echo "$GENE_LIST" | tr '[:lower:]' '[:upper:]' | perl -pe 's/\s*,\s*|\s+/ /g')
 
 NUM_CORES=$(nproc)
 echo "Using ${NUM_CORES} cores..."
