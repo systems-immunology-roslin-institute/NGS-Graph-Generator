@@ -107,6 +107,53 @@ fi
 
 COMPUTE_DATA=0
 HASH_DIRECTORY="${CACHE_DIRECTORY}/${INPUT_HASH}"
+CACHE_LOCK="${HASH_DIRECTORY}/lock"
+
+takeCacheLock()
+{
+  if ( set -o noclobber; echo "$$" > "$CACHE_LOCK") 2> /dev/null;
+  then
+    trap 'rm -f "$CACHE_LOCK"; exit $?' INT TERM EXIT
+
+    echo "Aquired lock ${CACHE_LOCK}..."
+    return 1
+  else
+    return 0
+  fi
+}
+
+waitForCacheToComplete()
+{
+  echo "Waiting for ${CACHE_LOCK}..."
+  takeCacheLock
+  while (( "$?" == "0" ))
+  do
+    sleep 30
+    takeCacheLock
+  done
+
+  releaseCacheLock
+}
+
+releaseCacheLock()
+{
+  rm -f "$CACHE_LOCK"
+  trap - INT TERM EXIT
+  echo "Released lock ${CACHE_LOCK}..."
+}
+
+cacheIsLocked()
+{
+  takeCacheLock
+  if [ "$?" == "1" ];
+  then
+    return 1
+    releaseCacheLock
+  else
+    return 0
+  fi
+}
+
 echo Checking if ${HASH_DIRECTORY} exists...
 if [ ! -d "${HASH_DIRECTORY}" ];
 then
@@ -118,9 +165,26 @@ then
     echo "Cannot create ${HASH_DIRECTORY}"
     exit $EXITCODE
   fi
-elif [ ! -e "${HASH_DIRECTORY}/valid" ]
-then
-  COMPUTE_DATA=1
+  takeCacheLock
+else
+  if [ cacheIsLocked ];
+  then
+    waitForCacheToComplete
+  fi
+
+  if [ ! -e "${HASH_DIRECTORY}/valid" ]
+  then
+    # There is a possible race condition where two or more processes
+    # manage to get here simultaneously, but the chances of it happening
+    # are fairly small
+    COMPUTE_DATA=1
+    takeCacheLock
+    if [ "$?" == "0" ];
+    then
+      echo "!!! Probable race condition encountered, exiting."
+      exit 1
+    fi
+  fi
 fi
 
 BASENAME_BAM_FILE=$(basename ${UNSORTED_BAM_FILE})
@@ -160,6 +224,7 @@ then
   fi
 
   touch "${HASH_DIRECTORY}/valid"
+  releaseCacheLock
 else
   echo Using cached data...
 fi
