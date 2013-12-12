@@ -78,7 +78,19 @@ then
   COVERAGE="55"
 fi
 
+echo "Computing valid gene names..."
+VALID_GENES=$(perl -pe 's/.*gene_name "([^"]+)".*/\1/' ${GTF_FILE} | sort | uniq)
 GENE_LIST=$(echo "$GENE_LIST" | tr '[:lower:]' '[:upper:]' | perl -pe 's/\s*,\s*|\s+/ /g')
+
+for GENE in ${GENE_LIST}
+do
+  echo ${VALID_GENES} | grep -q "\(^\|.*\s\+\)${GENE}\($\|.*\s\+\)"
+  if [ "$?" != 0 ];
+  then
+    echo "Gene ${GENE} is not present in ${GTF_FILE}."
+    exit 1
+  fi
+done
 
 NUM_CORES=$(nproc)
 echo "Using ${NUM_CORES} cores..."
