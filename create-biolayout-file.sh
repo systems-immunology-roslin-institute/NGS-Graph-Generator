@@ -3,7 +3,7 @@
 SCRIPT_NAME=$(basename $0)
 DIR_NAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-while getopts b:t:g:o:c:d:n:p:l:h ARG
+while getopts b:t:g:o:c:d:n:p:l:uh ARG
 do
   case ${ARG} in
     (b) UNSORTED_BAM_FILE=$(readlink -f "$OPTARG");;
@@ -15,6 +15,7 @@ do
     (n) GENE_LIST=$(cat "$OPTARG");;
     (p) PERCENTAGE="$OPTARG";;
     (l) COVERAGE="$OPTARG";;
+    (u) UNIQUIFY="-u";;
     (h)
       echo "${SCRIPT_NAME}"
       echo "  One of -d or -n must be specified in addition to all the other options"
@@ -27,6 +28,7 @@ do
       echo "  -n <file> A file containing a list of genes to examine"
       echo "  -p <value> The percentage similarity value (default 85)"
       echo "  -l <value> The percentage coverage value (default 55)"
+      echo "  -u discard redundant reads"
       exit 0;;
 
     (*)
@@ -255,11 +257,11 @@ R2R_OUTPUT_DIR="${OUTPUT_DIRECTORY}/r2r_output"
 for GENE in ${GENE_LIST}
 do
   echo "Writing ${GENE}.fasta"
-  ${DIR_NAME}/tab-to-fasta.sh "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
+  ${DIR_NAME}/tab-to-fasta.sh ${UNIQUIFY} -t "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta"
 
   echo "Writing ${GENE}.nodeclass"
-  ${DIR_NAME}/tab-to-nodeclass.sh "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
+  ${DIR_NAME}/tab-to-nodeclass.sh ${UNIQUIFY} -e -t "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
   rm -rf "${R2R_OUTPUT_DIR}"
