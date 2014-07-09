@@ -274,7 +274,10 @@ do
     exit $EXITCODE
   fi
   
+  OUTPUT_FILE_NAME="${GENE}-s${PERCENTAGE}-c${COVERAGE}${UNIQUIFY}.layout"
   cat "${R2R_OUTPUT_DIR}/${GENE}_pairwise.txt" \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass" > \
-    "${OUTPUT_DIRECTORY}/${GENE}.layout"
+    "${OUTPUT_DIRECTORY}/${OUTPUT_FILE_NAME}"
 done
+
+zip "${OUTPUT_DIRECTORY}/${OUTPUT_DIRECTORY}.zip" "${OUTPUT_DIRECTORY}/*.layout"
