@@ -3,6 +3,11 @@
 SCRIPT_NAME=$(basename $0)
 DIR_NAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+echo_timestamp()
+{
+  date +"%R:%S $*"
+}
+
 while getopts b:t:g:o:c:d:n:p:l:uh ARG
 do
   case ${ARG} in
@@ -80,7 +85,7 @@ then
   COVERAGE="55"
 fi
 
-echo "Computing valid gene names..."
+echo_timestamp "Computing valid gene names..."
 VALID_GENES=$(perl -pe 's/.*gene_name "([^"]+)".*/\1/' ${GTF_FILE} | sort | uniq)
 GENE_LIST=$(echo "$GENE_LIST" | tr '[:lower:]' '[:upper:]' | perl -pe 's/\s*,\s*|\s+/ /g')
 
@@ -89,24 +94,24 @@ do
   echo ${VALID_GENES} | grep -q "\(^\|.*\s\+\)${GENE}\($\|.*\s\+\)"
   if [ "$?" != 0 ];
   then
-    echo "Gene ${GENE} is not present in ${GTF_FILE}."
+    echo_timestamp "Gene ${GENE} is not present in ${GTF_FILE}."
     exit 1
   fi
 done
 
 NUM_CORES=$(nproc)
-echo "Using ${NUM_CORES} cores..."
+echo_timestamp "Using ${NUM_CORES} cores..."
 
-echo "Computing hash..."
+echo_timestamp "Computing hash..."
 INPUT_HASH=$(cat ${UNSORTED_BAM_FILE} ${CHROMOSOME_LENGTH_FILE} ${GTF_FILE} | md5sum)
 INPUT_HASH=${INPUT_HASH%% *}
 
-echo "BAM file: ${UNSORTED_BAM_FILE}"
-echo "Chromosome length file: ${CHROMOSOME_LENGTH_FILE}"
-echo "GTF file: ${GTF_FILE}"
-echo "Output directory: ${OUTPUT_DIRECTORY}"
-echo "Gene list: ${GENE_LIST}"
-echo "Input hash: ${INPUT_HASH}"
+echo_timestamp "BAM file: ${UNSORTED_BAM_FILE}"
+echo_timestamp "Chromosome length file: ${CHROMOSOME_LENGTH_FILE}"
+echo_timestamp "GTF file: ${GTF_FILE}"
+echo_timestamp "Output directory: ${OUTPUT_DIRECTORY}"
+echo_timestamp "Gene list: ${GENE_LIST}"
+echo_timestamp "Input hash: ${INPUT_HASH}"
 
 SAMTOOLS=samtools
 R_SCRIPT=Rscript
@@ -115,7 +120,7 @@ mkdir -p ${OUTPUT_DIRECTORY}
 EXITCODE="$?"
 if [ "$EXITCODE" != 0 ];
 then
-  echo "Cannot create ${OUTPUT_DIRECTORY}"
+  echo_timestamp "Cannot create ${OUTPUT_DIRECTORY}"
   exit $EXITCODE
 fi
 
@@ -125,11 +130,11 @@ CACHE_LOCK="${HASH_DIRECTORY}/lock"
 
 takeCacheLock()
 {
-  if ( set -o noclobber; echo "$$" > "$CACHE_LOCK") 2> /dev/null;
+  if ( set -o noclobber; echo_timestamp "$$" > "$CACHE_LOCK") 2> /dev/null;
   then
     trap 'rm -f "$CACHE_LOCK"; exit $?' INT TERM EXIT
 
-    echo "Aquired lock ${CACHE_LOCK}..."
+    echo_timestamp "Aquired lock ${CACHE_LOCK}..."
     return 1
   else
     return 0
@@ -138,7 +143,7 @@ takeCacheLock()
 
 waitForCacheToComplete()
 {
-  echo "Waiting for ${CACHE_LOCK}..."
+  echo_timestamp "Waiting for ${CACHE_LOCK}..."
   takeCacheLock
   while (( "$?" == "0" ))
   do
@@ -153,7 +158,7 @@ releaseCacheLock()
 {
   rm -f "$CACHE_LOCK"
   trap - INT TERM EXIT
-  echo "Released lock ${CACHE_LOCK}..."
+  echo_timestamp "Released lock ${CACHE_LOCK}..."
 }
 
 cacheIsLocked()
@@ -168,7 +173,7 @@ cacheIsLocked()
   fi
 }
 
-echo Checking if ${HASH_DIRECTORY} exists...
+echo_timestamp Checking if ${HASH_DIRECTORY} exists...
 if [ ! -d "${HASH_DIRECTORY}" ];
 then
   COMPUTE_DATA=1
@@ -176,7 +181,7 @@ then
   EXITCODE="$?"
   if [ "$EXITCODE" != 0 ];
   then
-    echo "Cannot create ${HASH_DIRECTORY}"
+    echo_timestamp "Cannot create ${HASH_DIRECTORY}"
     exit $EXITCODE
   fi
   takeCacheLock
@@ -195,7 +200,7 @@ else
     takeCacheLock
     if [ "$?" == "0" ];
     then
-      echo "!!! Probable race condition encountered, exiting."
+      echo_timestamp "!!! Probable race condition encountered, exiting."
       exit 1
     fi
   fi
@@ -210,12 +215,12 @@ GTF_ANNOTATION_FILE="${HASH_DIRECTORY}/${NO_EXT_BAM_FILE}-ensembl_gtfannotation.
 
 if [ "${COMPUTE_DATA}" == "1" ];
 then
-  echo "Sorting ${UNSORTED_BAM_FILE}..."
+  echo_timestamp "Sorting ${UNSORTED_BAM_FILE}..."
   ${SAMTOOLS} sort ${UNSORTED_BAM_FILE} ${SAMTOOLS_SORTED_BAM_FILE}
   EXITCODE="$?"
   if [ "$EXITCODE" != 0 ];
   then
-    echo "samtools sort step failed"
+    echo_timestamp "samtools sort step failed"
     exit $EXITCODE
   fi
 
@@ -224,7 +229,7 @@ then
   EXITCODE="$?"
   if [ "$EXITCODE" != 0 ];
   then
-    echo "grangesscript.R failed"
+    echo_timestamp "grangesscript.R failed"
     exit $EXITCODE
   fi
 
@@ -233,14 +238,14 @@ then
   EXITCODE="$?"
   if [ "$EXITCODE" != 0 ];
   then
-    echo "grangesscript_gtf.R failed"
+    echo_timestamp "grangesscript_gtf.R failed"
     exit $EXITCODE
   fi
 
   touch "${HASH_DIRECTORY}/valid"
   releaseCacheLock
 else
-  echo Using cached data...
+  echo_timestamp "Using cached data..."
 fi
 
 ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
@@ -248,7 +253,7 @@ ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION
 EXITCODE="$?"
 if [ "$EXITCODE" != 0 ];
 then
-  echo "findoverlaps.R failed"
+  echo_timestamp "findoverlaps.R failed"
   exit $EXITCODE
 fi
 
@@ -256,21 +261,21 @@ R2R_OUTPUT_DIR="${OUTPUT_DIRECTORY}/r2r_output"
 
 for GENE in ${GENE_LIST}
 do
-  echo "Writing ${GENE}.fasta"
+  echo_timestamp "Writing ${GENE}.fasta"
   ${DIR_NAME}/tab-to-fasta.sh ${UNIQUIFY} -t "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta"
 
-  echo "Writing ${GENE}.nodeclass"
+  echo_timestamp "Writing ${GENE}.nodeclass"
   ${DIR_NAME}/tab-to-nodeclass.sh ${UNIQUIFY} -e -t "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
   rm -rf "${R2R_OUTPUT_DIR}"
-  ${DIR_NAME}/read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} \
+  ${DIR_NAME}/read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} -a ${NUM_CORES} -k \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
   EXITCODE="$?"
   if [ "$EXITCODE" != 0 ];
   then
-    echo "read2read.py failed"
+    echo_timestamp "read2read.py failed"
     exit $EXITCODE
   fi
   
@@ -280,4 +285,5 @@ do
     "${OUTPUT_DIRECTORY}/${OUTPUT_FILE_NAME}"
 done
 
-zip "${OUTPUT_DIRECTORY}/${OUTPUT_DIRECTORY}.zip" "${OUTPUT_DIRECTORY}/*.layout"
+BASE_DIRECTORY_NAME=$(basename ${OUTPUT_DIRECTORY})
+zip -j ${OUTPUT_DIRECTORY}/${BASE_DIRECTORY_NAME}.zip ${OUTPUT_DIRECTORY}/*.layout
