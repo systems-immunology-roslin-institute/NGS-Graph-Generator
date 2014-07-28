@@ -12,7 +12,6 @@ if __name__ == "__main__":
         print "Script directory is " + scriptDir
 
         parser = optparse.OptionParser("usage: %prog [options] fastaFile outputDir")
-        parser.add_option("-P", "--protein", dest="protein",default="F", help="specify formatdb input, protein or nucleotide (F for nucleotide). Default=F")
         parser.add_option("-p", "--percentage", dest="similarity", default=85, type="int", help="specify sequence similarity percentage. Default=85.")
         parser.add_option("-W", "--wordsize", dest="wordsize", default=18, type="int", help="specify megablast word size. Default=18.")
         parser.add_option("-a", "--parallel", dest="numthreads", default=1, type="int", help="specify megablast number of threads. Default=1.")
@@ -27,7 +26,6 @@ if __name__ == "__main__":
 
         fastaFile = args[0]
         outputDir = args[1]
-        protein = options.protein
         percentage = options.similarity
         wordsize = options.wordsize
         numthreads = options.numthreads
@@ -44,26 +42,38 @@ if __name__ == "__main__":
 
         os.chdir(outputDir)
         nameDB = os.path.basename(string.split(fastaFile,".")[0])
-        cmd = scriptDir + "/formatdb -t " + nameDB + " -i " + fastaFile + " -p " +  protein + " -n " + nameDB
+        cmd = scriptDir + "/makeblastdb -dbtype nucl -out " + nameDB + " -input_type fasta -in " + fastaFile + " -title " + nameDB + " -max_file_sz 2GB"
         if verbose:
                 print "Creating database..."
                 print cmd
         execCmd = os.popen(cmd, "r")
         outCmd = execCmd.read()
-        execCmd.close()
+        exitCode = execCmd.close()
+
+        if exitCode != None:
+          print outCmd
+          print "...failed"
+          exit(exitCode)
 
         megablast_txtFile = outputDir + "/" + nameDB + "_megablast.txt"
         pairwise_txtFile = outputDir + "/" + nameDB + "_pairwise.txt"
 
-        cmd = scriptDir + "/megablast -d " + nameDB + " -i " + fastaFile + " -p " + \
-            str(percentage) + " -W " + str(wordsize) + " -UT -X40 -JF -F mD -v90000000 -b90000000 -D3 -a " + \
-            str(numthreads) + " -o " + megablast_txtFile
+        cmd = scriptDir + "/blastn -db " + nameDB + " -query " + fastaFile + " " \
+            "-perc_identity " + str(percentage) + " -word_size " + str(wordsize) + " " \
+            "-xdrop_gap 40 -num_alignments 90000000 -dust yes -soft_masking true -lcase_masking " + \
+            " -outfmt \"7 qacc sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore\" " + \
+            "-num_threads " + str(numthreads) + " -out " + megablast_txtFile
         if verbose:
                 print "Making alignment..."
                 print cmd
         execCmd = os.popen(cmd, "r")
         outCmd = execCmd.read()
-        execCmd.close()
+        exitCode = execCmd.close()
+
+        if exitCode != None:
+          print outCmd
+          print "...failed"
+          exit(exitCode)
 
         cmd = "python " + scriptDir + "/megablast2ncol.py " + fastaFile + " " + megablast_txtFile + " " + \
             pairwise_txtFile + " " + str(percentage/float(100)) + " " + str(coverage/float(100))
