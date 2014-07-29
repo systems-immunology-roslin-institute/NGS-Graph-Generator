@@ -248,6 +248,9 @@ else
   echo_timestamp "Using cached data..."
 fi
 
+# Make a symlink in the job directory to the cached data
+ln -s ${HASH_DIRECTORY} ${OUTPUT_DIRECTORY}/${INPUT_HASH}
+
 ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
   -p "${OUTPUT_DIRECTORY}/"
 EXITCODE="$?"
