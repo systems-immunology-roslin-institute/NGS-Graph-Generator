@@ -273,7 +273,7 @@ do
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
   rm -rf "${R2R_OUTPUT_DIR}"
-  ${DIR_NAME}/read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} -a ${NUM_CORES} -k \
+  ${DIR_NAME}/read2read.py -a ${NUM_CORES} -p ${PERCENTAGE} -l ${COVERAGE} -a ${NUM_CORES} \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
   EXITCODE="$?"
   if [ "$EXITCODE" != 0 ];
