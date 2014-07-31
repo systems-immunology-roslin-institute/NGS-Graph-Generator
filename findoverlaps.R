@@ -2,6 +2,11 @@ library(GenomicRanges)
 library(Biostrings)
 library(getopt)
 
+printWithTimeStamp <- function(text)
+{
+  cat(sprintf("%s %s", format(Sys.time(), "%X"), text))
+}
+
 optspec <- matrix(c(
 	'grangesFile', 'g', 1, "character", "GRanges.RData file (required)",
 	'gtfAnnotationFile', 'e', 1, "character", "ensembl_gtfannotation.RData file (required)",
@@ -29,57 +34,55 @@ if(!is.null(opt$geneList))
   targetGenes <- readLines(opt$fileGeneList)
 }
 
-cat(sprintf("Processing %d genes...\n", length(targetGenes)))
+printWithTimeStamp(sprintf("Processing %d genes...\n", length(targetGenes)))
 
 # load GRanges of Ensembl human gtf annotations (based on hg19)
 if(!file.exists(opt$gtfAnnotationFile))
 {
-	cat(sprintf("GTF annotation file '%s' does not exist or cannot be accessed.\n", opt$gtfAnnotationFile))
+	printWithTimeStamp(sprintf("GTF annotation file '%s' does not exist or cannot be accessed.\n", opt$gtfAnnotationFile))
 	q("no", 1)
 }
 
-cat(sprintf("Loading GTF annotation file '%s'...\n", opt$gtfAnnotationFile))
+printWithTimeStamp(sprintf("Loading GTF annotation file '%s'...\n", opt$gtfAnnotationFile))
 load(opt$gtfAnnotationFile)
 
 # load tophat2 aligned Rdata
 if(!file.exists(opt$grangesFile))
 {
-	cat(sprintf("GRanges file '%s' does not exist or cannot be accessed.\n", opt$grangesFile))
+	printWithTimeStamp(sprintf("GRanges file '%s' does not exist or cannot be accessed.\n", opt$grangesFile))
 	q("no", 1)
 }
 
-cat(sprintf("Loading GRanges file '%s'...\n", opt$grangesFile))
+printWithTimeStamp(sprintf("Loading GRanges file '%s'...\n", opt$grangesFile))
 load(opt$grangesFile)
 
 # findoverlaps between aligned reads and genomic annotations
-cat("Finding overlaps...\n")
+printWithTimeStamp("Finding overlaps...\n")
 overlaps <- findOverlaps(GRbam,GR)
 
-cat("Collating data")
+printWithTimeStamp("Collating data:\n")
 overs <- data.frame(NA,rownames=c(1:length(overlaps)))
-cat(".")
+printWithTimeStamp("  queryHits\n")
 overs$queryHits<-queryHits(overlaps)
-cat(".")
+printWithTimeStamp("  subjectHits\n")
 overs$subjectHits<-subjectHits(overlaps)
 
-cat(".")
+printWithTimeStamp("  readname\n")
 overs$readname <- values(GRbam)["name"][overs$queryHits,]
-cat(".")
+printWithTimeStamp("  sequence\n")
 overs$readSeq <-(values(GRbam)[["sequence"]][overs$queryHits])
-cat(".")
+printWithTimeStamp("  geneid\n")
 overs$geneid <-(values(GR)[["geneid"]][overs$subjectHits])
-cat(".")
+printWithTimeStamp("  transcriptid\n")
 overs$transcriptid <-(values(GR)[["transcriptid"]][overs$subjectHits])
-cat(".")
+printWithTimeStamp("  exonnumber\n")
 overs$exonnumber <-(values(GR)[["exonnumber"]][overs$subjectHits])
-cat(".")
+printWithTimeStamp("  genename\n")
 overs$genename <-(values(GR)[["genename"]][overs$subjectHits])
-cat(".")
+printWithTimeStamp("  biotype\n")
 overs$biotype <-(values(GR)[["biotype"]][overs$subjectHits])
 
-cat(".")
 overs <- overs[,-c(1,2)]
-cat("\n")
 
 if(is.null(opt$outFilePrefix))
 {
@@ -92,7 +95,7 @@ if(is.null(opt$outFilePrefix))
 for(t in 1:length(targetGenes))
 {
 	outFile = paste(prefix, targetGenes[t], ".tab",sep="")
-	cat(sprintf("Writing '%s'...\n", outFile))
+	printWithTimeStamp(sprintf("Writing '%s'...\n", outFile))
 	oversSubset <- overs[overs$genename==targetGenes[t],]
 	write.table(oversSubset,outFile,row.names=F,col.names=T,sep="\t",quote=F)
 }
