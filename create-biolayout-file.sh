@@ -251,25 +251,31 @@ fi
 # Make a symlink in the job directory to the cached data
 ln -s ${HASH_DIRECTORY} ${OUTPUT_DIRECTORY}/${INPUT_HASH}
 
-${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE_LIST}" \
-  -p "${OUTPUT_DIRECTORY}/"
-EXITCODE="$?"
-if [ "$EXITCODE" != 0 ];
-then
-  echo_timestamp "findoverlaps.R failed"
-  exit $EXITCODE
-fi
-
 R2R_OUTPUT_DIR="${OUTPUT_DIRECTORY}/r2r_output"
 
 for GENE in ${GENE_LIST}
 do
+  if [ ! -e "${HASH_DIRECTORY}/${GENE}.tab" ];
+  then
+    echo_timestamp "Writing ${GENE}.tab"
+    ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE}" \
+      -p "${HASH_DIRECTORY}/"
+    EXITCODE="$?"
+    if [ "$EXITCODE" != 0 ];
+    then
+      echo_timestamp "findoverlaps.R failed"
+      exit $EXITCODE
+    fi
+  else
+    echo_timestamp "Using cached ${GENE}.tab"
+  fi
+
   echo_timestamp "Writing ${GENE}.fasta"
-  ${DIR_NAME}/tab-to-fasta.sh ${UNIQUIFY} -t "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
+  ${DIR_NAME}/tab-to-fasta.sh ${UNIQUIFY} -t "${HASH_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.fasta"
 
   echo_timestamp "Writing ${GENE}.nodeclass"
-  ${DIR_NAME}/tab-to-nodeclass.sh ${UNIQUIFY} -e -t "${OUTPUT_DIRECTORY}/${GENE}.tab" > \
+  ${DIR_NAME}/tab-to-nodeclass.sh ${UNIQUIFY} -e -t "${HASH_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
   rm -rf "${R2R_OUTPUT_DIR}"
