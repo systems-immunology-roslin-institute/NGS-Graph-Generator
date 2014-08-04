@@ -141,7 +141,7 @@ takeCacheLock()
   fi
 }
 
-waitForCacheToComplete()
+takeCacheLockBlocking()
 {
   echo_timestamp "Waiting for ${CACHE_LOCK}..."
   takeCacheLock
@@ -150,7 +150,11 @@ waitForCacheToComplete()
     sleep 30
     takeCacheLock
   done
+}
 
+waitForCacheToComplete()
+{
+  takeCacheLockBlocking
   releaseCacheLock
 }
 
@@ -257,9 +261,11 @@ for GENE in ${GENE_LIST}
 do
   if [ ! -e "${HASH_DIRECTORY}/${GENE}.tab" ];
   then
+    takeCacheLockBlocking
     echo_timestamp "Writing ${GENE}.tab"
     ${R_SCRIPT} ${DIR_NAME}/findoverlaps.R -g "${GRANGES_FILE}" -e "${GTF_ANNOTATION_FILE}" -d "${GENE}" \
       -p "${HASH_DIRECTORY}/"
+    releaseCacheLock
     EXITCODE="$?"
     if [ "$EXITCODE" != 0 ];
     then
