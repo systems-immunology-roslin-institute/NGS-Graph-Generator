@@ -85,6 +85,14 @@ then
   COVERAGE="55"
 fi
 
+mkdir -p ${OUTPUT_DIRECTORY}
+EXITCODE="$?"
+if [ "$EXITCODE" != 0 ];
+then
+  echo_timestamp "Cannot create ${OUTPUT_DIRECTORY}"
+  exit $EXITCODE
+fi
+
 echo_timestamp "Computing valid gene names..."
 VALID_GENES=$(perl -pe 's/.*gene_name "([^"]+)".*/\1/' ${GTF_FILE} | sort | uniq)
 GENE_LIST=$(echo "$GENE_LIST" | tr '[:lower:]' '[:upper:]' | perl -pe 's/\s*,\s*|\s+/ /g')
@@ -115,14 +123,6 @@ echo_timestamp "Input hash: ${INPUT_HASH}"
 
 SAMTOOLS=samtools
 R_SCRIPT=Rscript
-
-mkdir -p ${OUTPUT_DIRECTORY}
-EXITCODE="$?"
-if [ "$EXITCODE" != 0 ];
-then
-  echo_timestamp "Cannot create ${OUTPUT_DIRECTORY}"
-  exit $EXITCODE
-fi
 
 COMPUTE_DATA=0
 HASH_DIRECTORY="${CACHE_DIRECTORY}/${INPUT_HASH}"
