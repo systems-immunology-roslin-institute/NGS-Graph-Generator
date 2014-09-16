@@ -23,9 +23,9 @@ def megablast2ncol(fastaFile, alignFile, outFile, matchaccuracy, matchlength):
 			seqA.add(seqname)
 		else:
 			seq = string.split(line,"\n")[0]
-			try:
-				dicFasta[seqname]
-			except:
+			if seqname in dicFasta:
+				dicFasta[seqname] += len(seq)
+			else:
 				dicFasta[seqname] = len(seq)
 	fastaF.close()
 
