@@ -94,7 +94,8 @@ then
 fi
 
 echo_timestamp "Computing valid gene names..."
-VALID_GENES=$(perl -pe 's/.*gene_name "([^"]+)".*/\1/' ${GTF_FILE} | sort | uniq)
+VALID_GENES=$(perl -pe 's/.*gene_name "([^"]+)".*/\1/' ${GTF_FILE} | \
+  tr '[:lower:]' '[:upper:]' | sort | uniq)
 GENE_LIST=$(echo "$GENE_LIST" | tr '[:lower:]' '[:upper:]' | perl -pe 's/\s*,\s*|\s+/ /g')
 
 for GENE in ${GENE_LIST}
