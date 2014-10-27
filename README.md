@@ -13,21 +13,18 @@ Prerequisites
 Authors
 -------
 
-The scripts provide are based on the work of others. In particular:
+The scripts provided are based on the work of others. In particular:
 
 * Harpreet Kaur
-
  * findoverlaps.R
  * grangesscript.R
  * grangesscript_gtf.R
 
 * Fioravante de Sapio
-
  * read2read.py
  * megablast2ncol.py
 
 * Tim Angus
-
  * create-biolayout-file.sh
  * tab-to-fasta.sh
  * tab-to-nodeclass.sh
