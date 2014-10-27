@@ -6,9 +6,9 @@ This is a script that is used to take next generation gene sequencing data and p
 Prerequisites
 -------------
 
-Python >= 2.7.3
-samtools >= 0.1.18
-R >= 2.15.2
+* Python >= 2.7.3
+* samtools >= 0.1.18
+* R >= 2.15.2
 
 Authors
 -------
