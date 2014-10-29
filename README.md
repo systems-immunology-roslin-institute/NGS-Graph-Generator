@@ -34,14 +34,14 @@ $ create-biolayout-file.sh –b <bam file> -t <The chromosome length file> -g <T
 ```
 
 Where:
-•	–b is a bam file after mapping process
-•	–t is a chromosome length file 
-•	–g is a GTF/GFF file for annotation of the nodes
-•	–o is the desired output directory of this process
-•	–d is an interested gene or set of genes for the analysis
-•	–p is a percentage sequence similarity (overlap) between two reads (default = 98)
-•	–l is a percentage coverage value (default = 31)
-•	–u is an optional to remove redundant reads
+  * –b is a bam file after mapping process
+  * –t is a chromosome length file 
+  * –g is a GTF/GFF file for annotation of the nodes
+  * –o is the desired output directory of this process
+  * –d is an interested gene or set of genes for the analysis
+  * –p is a percentage sequence similarity (overlap) between two reads (default = 98)
+  * –l is a percentage coverage value (default = 31)
+  * –u is an optional to remove redundant reads
 
 For graph visualisation
 Output format
