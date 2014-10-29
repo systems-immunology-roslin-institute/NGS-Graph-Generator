@@ -43,12 +43,10 @@ Where:
 •	–l is a percentage coverage value (default = 31)
 •	–u is an optional to remove redundant reads
 
-The output of this program is a layout file which can visualise using BioLayout Express3D software.
-
 For graph visualisation
 Output format
-Layout file (.layout) can be visualised using BioLayout Express3D software
-Layout file is a text file that contains pairwise comparison of all reads of selected gene with edge weight. It also contains classsets which defines the nodes. For instance there will be a classsets called nodeclass which defines the nodes to exon and transcripts which it belongs.
+
+The output of this program is a layout (.layout) file which can visualise using BioLayout Express3D software. Layout file is a text file that contains pairwise comparison of all reads of selected gene with edge weight. It also contains classsets which defines the nodes. For instance there will be a classsets called nodeclass which defines the nodes to exon and transcripts which it belongs.
 
 In this example below is a .layout format which is a text file contains all information of selected gene. 
 
