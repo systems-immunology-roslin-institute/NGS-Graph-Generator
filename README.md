@@ -82,7 +82,7 @@ Please note BioLayout Express3D uses high end 3D visualisation technology and th
 Authors
 -------
 
-Fahmi Nazarie
+* Fahmi Nazarie
 
 The scripts provided are based on the work of others. In particular:
 
