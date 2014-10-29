@@ -29,7 +29,9 @@ Input format
 
 To run the program, type the command-line:
 
-$ create-biolayout-file.sh –b <bam file> -t <The chromosome length file> -g <The GTF file> -o <The directory in which to place the output> -d <"GENE" A list of genes to examine> -p <The percentage similarity value (default 98)> -l <The percentage coverage value (default 31)> -u <discard redundant reads>
+```
+$ create-biolayout-file.sh –b <bam file> -t <The chromosome length file> -g <The GTF file> -o <The directory in which to place the output> -d <"GENE" A list of genes to examine> -p <The percentage similarity value (default 98)> -l <The percentage coverage value (default 31)> -u <discard redundant reads> 
+```
 
 Where:
 •	–b is a bam file after mapping process
