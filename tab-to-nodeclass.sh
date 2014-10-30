@@ -39,5 +39,5 @@ then
         # re-sort by counts (not really necessary)
         sort -rn | \
         # Use read counts as node size
-        awk {'print "//NODESIZE\t\""$2"\"\t"$1'}
+        awk {'print "//NODESIZE\t\""$1"-depth-read-"$2"\"\t"$1'}
 fi
