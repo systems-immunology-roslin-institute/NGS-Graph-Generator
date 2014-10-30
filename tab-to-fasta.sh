@@ -31,7 +31,7 @@ then
         # re-sort by counts (not really necessary)
         sort -rn | \
         # Change to fasta format
-        awk {'print ">"$2" "$1"\n"$3'}
+        awk {'print ">"$1"-depth-read-"$2" "$1"\n"$3'}
 else
     cat ${TAB_FILE} | \
         # Skip first line
