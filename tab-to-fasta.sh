@@ -19,23 +19,28 @@ NO_EXT="${BASE_NAME%.*}"
 
 if [ "${UNIQUIFY}" == "1" ];
 then
-    cat ${TAB_FILE} | \
+   cat ${TAB_FILE} | \
         # Skip first line
         sed -e '1,2d' | \
-        # Look at third and fourth columns
-        awk {'print $3" "$4'} | \
-        # sort on second column
-        sort -k 2,2 | \
-        # uniq on second column
-        uniq -cf 1 | \
-        # re-sort by counts (not really necessary)
-        sort -rn | \
-        # Change to fasta format
-        awk {'print ">"$1"-depth-read-"$2" "$1"\n"$3'}
+	# Cut column read and sequence
+	cut -f3,4 | \
+	# Sort first column and remove duplicate
+	sort -k1 -u | \
+	# Sort second column and remove duplicate read name
+	sort -k2 | \
+	# Count occurrence of duplicate sequence
+	uniq -cf1 | \
+	# Sort (not really neccessary)
+	sort -rn| \
+	awk {'print ">"$2"_"$1" "$1"\n"$3'}
 else
     cat ${TAB_FILE} | \
         # Skip first line
         sed -e '1,2d' | \
-        # Change to fasta format
-        awk {'print ">"$3"\n"$4'}
+	# Cut column read and sequence
+	cut -f3,4 | \
+	# Sort first column and remove duplicate
+	sort -k1 -u | \
+	# Change to fasta format
+	awk {'print ">"$1"\n"$2'}
 fi

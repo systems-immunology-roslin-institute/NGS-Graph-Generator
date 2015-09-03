@@ -104,6 +104,7 @@ do
   if [ "$?" != 0 ];
   then
     echo_timestamp "Gene ${GENE} is not present in ${GTF_FILE}."
+    continue
     exit 1
   fi
 done
@@ -285,20 +286,24 @@ do
   ${DIR_NAME}/tab-to-nodeclass.sh ${UNIQUIFY} -e -t "${HASH_DIRECTORY}/${GENE}.tab" > \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass"
 
-  rm -rf "${R2R_OUTPUT_DIR}"
-  ${DIR_NAME}/read2read.py -p ${PERCENTAGE} -l ${COVERAGE} -a ${NUM_CORES} \
-    "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
-  EXITCODE="$?"
-  if [ "$EXITCODE" != 0 ];
-  then
-    echo_timestamp "read2read.py failed"
-    exit $EXITCODE
-  fi
+ rm -rf "${R2R_OUTPUT_DIR}"
+ ${DIR_NAME}/read2read.py -p ${PERCENTAGE} -l ${COVERAGE} -a ${NUM_CORES} \
+   "${OUTPUT_DIRECTORY}/${GENE}.fasta" "${R2R_OUTPUT_DIR}"
+ EXITCODE="$?"
+ if [ "$EXITCODE" != 0 ];
+ then
+   echo_timestamp "read2read.py failed"
+ continue  
+ exit $EXITCODE
+ fi
   
   OUTPUT_FILE_NAME="${GENE}-s${PERCENTAGE}-c${COVERAGE}${UNIQUIFY}.layout"
   cat "${R2R_OUTPUT_DIR}/${GENE}_pairwise.txt" \
     "${OUTPUT_DIRECTORY}/${GENE}.nodeclass" > \
     "${OUTPUT_DIRECTORY}/${OUTPUT_FILE_NAME}"
+
+echo "Finished running job!"
+
 done
 
 BASE_DIRECTORY_NAME=$(basename ${OUTPUT_DIRECTORY})
