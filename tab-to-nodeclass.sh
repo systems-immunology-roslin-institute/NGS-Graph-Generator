@@ -18,7 +18,7 @@ fi
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BASE_NAME=$(basename "$TAB_FILE")
 NO_EXT="${BASE_NAME%.*}"
-COLOUR="${SCRIPT_DIR}/color.txt"
+COLOR="${SCRIPT_DIR}/color.txt"
 
 if [ "${UNIQUIFY}" == "1" ];
 then
