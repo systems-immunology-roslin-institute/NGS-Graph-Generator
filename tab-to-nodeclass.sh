@@ -61,6 +61,8 @@ then
         ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOR} \
         OFS="\t" t1
    
+    awk 'FNR==NR {T[$1]=$2; next} {print $0, T[$2]}' 'FS=  +' ${COLOR} t1
+
     rm t1
 
 else
