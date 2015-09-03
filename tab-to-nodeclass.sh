@@ -58,7 +58,7 @@ then
          sort > t1    
 
     awk 'FNR==NR{B=$NF;$NF="";gsub(/[[:space:]]+$/,X,$0);A[$0]=B;next} \
-        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOUR} \
+        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOR} \
         OFS="\t" t1
    
     rm t1
@@ -78,7 +78,7 @@ else
          sort > t1
 
 	awk 'FNR==NR{B=$NF;$NF="";gsub(/[[:space:]]+$/,X,$0);A[$0]=B;next} \
-        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOUR} \
+        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOR} \
         OFS="\t" t1
 
     rm t1
