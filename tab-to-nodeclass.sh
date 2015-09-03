@@ -18,7 +18,7 @@ fi
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 BASE_NAME=$(basename "$TAB_FILE")
 NO_EXT="${BASE_NAME%.*}"
-COLOR="${SCRIPT_DIR}/color.txt"
+COLOUR="${SCRIPT_DIR}/color.txt"
 
 if [ "${UNIQUIFY}" == "1" ];
 then
@@ -58,7 +58,7 @@ then
          sort > t1    
 
     awk 'FNR==NR{B=$NF;$NF="";gsub(/[[:space:]]+$/,X,$0);A[$0]=B;next} \
-        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOR} \
+        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOUR} \
         OFS="\t" t1
    
     rm t1
@@ -78,7 +78,7 @@ else
          sort > t1
 
 	awk 'FNR==NR{B=$NF;$NF="";gsub(/[[:space:]]+$/,X,$0);A[$0]=B;next} \
-        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOR} \
+        ($2" "$3 in A){print $0 OFS A[$2" "$3]}' ${COLOUR} \
         OFS="\t" t1
 
     rm t1
