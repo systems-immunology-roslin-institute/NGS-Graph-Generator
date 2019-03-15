@@ -85,18 +85,18 @@ Authors
 The scripts provided are based on the work of others. In particular:
 
 * Harpreet Kaur and Fahmi W. Nazarie
- * findoverlaps.R
- * grangesscript.R
- * grangesscript_gtf.R
+ ** findoverlaps.R
+ ** grangesscript.R
+ ** grangesscript_gtf.R
 
 * Fioravante de Sapio and Fahmi W. Nazarie
- * read2read.py
- * megablast2ncol.py
+ ** read2read.py
+ ** megablast2ncol.py
 
 * Tim Angus and Fahmi W. Nazarie
- * create-biolayout-file.sh
- * tab-to-fasta.sh
- * tab-to-nodeclass.sh
- * Modifications to above scripts
+ ** create-biolayout-file.sh
+ ** tab-to-fasta.sh
+ ** tab-to-nodeclass.sh
+ ** Modifications to above scripts
 
 
