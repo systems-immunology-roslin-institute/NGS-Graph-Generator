@@ -3,7 +3,7 @@ NGS Graph Generator: graph-based visualisation of RNA-seq data
 
 NGS graph generator supports the graph-based visualisation of RNA-seq data and provides a complementary approach to understanding transcript diversity and issues with assembly.  Following the mapping of reads to the reference genome, read to read comparison is performed on portions of the data (e.g. all reads mapping to a given gene) using Mega BLAST to provide a matrix of weighted similarity scores between reads.  
 
-This is a script that is used to take next generation gene sequencing data and perform read to read comparison in order to construct a graph based representation. The output is in the form of a .layout file which may be opened by the graph visualisation tool [BioLayout](http://www.biolayout.org/).
+This is a script that is used to take next generation gene sequencing data and perform read to read comparison in order to construct a graph based representation. The output is in the form of a .layout file which may be opened by the graph visualisation tool [Graphia](https://kajeka.com/).
 
 Prerequisites
 -------------
