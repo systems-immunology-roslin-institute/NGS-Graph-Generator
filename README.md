@@ -70,8 +70,8 @@ In this example below is a .layout format which is a text file contains all info
 
 
 For graph visualisation of RNA-seq data, a user has to download:
-•	BioLayout Express3D software (http://www.biolayout.org/download/)
-Please note BioLayout Express3D uses high end 3D visualisation technology and the machine running the program will require a good graphics card, at least 4 Gb of RAM and preferably a 64 bit OS.  The better your machine the bigger the graphs you will be able to render and the smoother your interaction with them.
+•	Graphia software (https://kajeka.com/)
+Please note Graphia uses high end 3D visualisation technology and the machine running the program will require a good graphics card, at least 4 Gb of RAM and preferably a 64 bit OS.  The better your machine the bigger the graphs you will be able to render and the smoother your interaction with them.
 
 
 
@@ -84,16 +84,16 @@ Authors
 
 The scripts provided are based on the work of others. In particular:
 
-* Harpreet Kaur and Fahmi Nazarie
+* Harpreet Kaur and Fahmi W. Nazarie
  * findoverlaps.R
  * grangesscript.R
  * grangesscript_gtf.R
 
-* Fioravante de Sapio and Fahmi Nazarie
+* Fioravante de Sapio and Fahmi W. Nazarie
  * read2read.py
  * megablast2ncol.py
 
-* Tim Angus and Fahmi Nazarie
+* Tim Angus and Fahmi W. Nazarie
  * create-biolayout-file.sh
  * tab-to-fasta.sh
  * tab-to-nodeclass.sh
